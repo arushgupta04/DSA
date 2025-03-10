@@ -1,190 +1,159 @@
-#include<stdio.h>
+#include<stdio.h>                                                                                                                                #include<stdio.h>
+#include<stdlib.h>
+#include<ctype.h>
 #include<string.h>
-#include<math.h>
-#include<ctype.h>// to check it is alpha, digit, etc
-int top1 = -1, top2= -1;
-int operand[100];
-char operator[100];
-int precedence(char opr){
-    switch(opr){
-        case '+':
-        case '-':
-             return 1;
-        case'*':
-        case'/':
-            return 2;
-        case'^':
-            return 3;
-        default:
-            return 0;
+int precedence(char op){
+    switch(op){   
 
-    }
-}
-void doProcess(){
-    int x = operand[top1--];
-    int y = operand[top1--];
-    char opr = operator[top2--];
-    int z;
-    switch(opr){
         case '+':
-        z = y+x;
-        break;
         case '-':
-        z = y-x;
-        break;
+         return 1;
+         case '*':
         case '/':
-        z = y/x;
-        break;
-        case '*':
-        z = y*x;
-        break;
-        case'^':
-        z = pow(y,x);
-        break;
+         return 2;
+         case '^':
+         return 3;
+         default:
+         return -1; 
     }
-    operand[++top1]=z;
-
-
 }
-
-int evalInfixExpression(char *exp){
-    int size = strlen(exp);
-    for(int i = 0;i<size;i++){
-        char ch = exp[i];
-        if(isdigit(ch)){
-       // operand[++top1] = ch-'0';
-       int num=0;
-       while(isdigit(exp[i])){
-        num = num *10+exp[i]-48;
-        i++;
-       }
-       i--;
-       operand[++top1] = num;
-    }
-        else if(ch == '+'|| ch =='-' || ch =='/'|| ch =='*'|| ch =='^'){
-            if(top2 == -1)
-            operator[++top2] = ch;
-          
-                else{
-                    while(top2!= -1 && precedence(ch)<= precedence(operator[top2])){
-                        doProcess();
-                    }
-                    operator[++top2] = ch;
-                }
-            
-
-        }
-        else if(ch =='('){
-            operator[++top2] = '(';
-
-        }
-        else if (ch == ')'){
-            while(operator[top2]!= '('){
-                doProcess();
-            }
-            top2--;
-
-        }
-    }
-    while(top2 != -1){
-        doProcess();
-    }
-    return operand[top1--];
-}
-
-int evalPostFixExpression(char *exp){
-    int size = strlen(exp);
+char* convertInfixToPostfix(char* exp){
+    int size=strlen(exp),top=-1,index=0;
+    char* str=(char*)malloc(size+1);
+    char stack[size];
     for(int i=0;i<size;i++){
-        char ch = exp[i];
-        if(isdigit(ch)){
-            int num = 0;
-            while(isdigit(exp[i])){
-            num = num *10+exp[i]-'0';
-            i++;
+        char ch=exp[i];
+        if(isalnum(ch)){
+            str[index++]=ch;
         }
-        i--;
-        operand[++top1]=num;
-
-    }
-    else if(ch == '+' || ch=='-' || ch == '/' || ch == '*' || ch =='^'){
-        int x = operand[top1--];
-        int y = operand[top1--];
-        int z;
-        switch(ch){
-            case'+':
-            z = y+x;
-            break;
-            case'-':
-            z = y-x;
-            break;
-            case'*':
-            z = y*x;
-            break;
-            case'/':
-            z = y/x;
-            break;
-            case'^':
-            z = pow(y,x);
-            break;
-        }  
-        operand[++top1] = z;
-    }
-}
-return operand[top1--];
-}
-int evalPreFixExpression(char *exp){
-    int size = strlen(exp);
-    for(int i=size -1 ;i>=0;i--){
-        char ch = exp[i];
-        if(isdigit(ch)){
-            int num = 0;
-            while(isdigit(exp[i])){
-            num = num *10+exp[i]-'0';
-            i++;
+        else if(ch=='+'||ch=='-'||ch=='*'||ch=='/'||ch=='^'){
+           if(top==-1)
+           stack[++top]=ch;
+           else{
+            while(top!=-1 && precedence (ch)<=precedence(stack[top])){
+                str[index++]=stack[top--];
+            }
+            stack[++top]=ch;
+           }
         }
-        i--;
-        operand[++top1]=num;
+            else if(ch=='('){
+                stack[++top]=ch;
+            }
+            else if(ch==')'){
+                while(stack[top]!='('){ 
+                   str[index++]=stack[top--]; 
 
+                }
+                top--;
+          }
+          }
+          while(top!=-1){
+            str[index++]=stack[top--];
+          }
+          str[index]='\0'; 
+          return str;
     }
-    else if(ch == '+' || ch=='-' || ch == '/' || ch == '*' || ch =='^'){
-        int x = operand[top1--];
-        int y = operand[top1--];
-        int z;
-        switch(ch){
-            case'+':
-            z = y+x;
-            break;
-            case'-':
-            z = y-x;
-            break;
-            case'*':
-            z = y*x;
-            break;
-            case'/':
-            z= y/x;
-            break;
-            case'^':
-            z = pow(y,x);
-            break;
-        }  
-        operand[++top1] = z;
+
+char* convertInfixToPrefix(char* exp){
+    int size=strlen(exp),top=-1,index=0;
+    char* str=(char*)malloc(size+1);
+    char stack[size];
+    for(int i=size-1;i>=0;i--){
+        char ch=exp[i];
+        if(isalnum(ch)){
+            str[index++]=ch;
+        }
+        else if(ch=='+'||ch=='-'||ch=='*'||ch=='/'||ch=='^'){
+            if(top==-1)
+            stack[++top]=ch;
+            else{
+            while(top!=-1 && precedence (ch)<=precedence(stack[top])){
+                    str[index++]=stack[top--];
+            }
+            stack[++top]=ch;
+            }
+        }
+        else if(ch==')'){
+            stack[++top]=ch;
+        }
+        else if(ch=='('){
+            while(stack[top]!=')'){ 
+                str[index++]=stack[top--]; 
+            }
+            top--;
+        }
     }
+        while(top!=-1){
+            str[index++]=stack[top--];
+        }
+        str[index]='\0'; 
+        strrev(str);
+        return str;
 }
-return operand[top1--];
+
+char* convertPostfixToInfix(char* exp){
+    int size=strlen(exp) , top=-1;
+    char stack[size][100];
+    for(int i=0;i<size;i++){
+        char ch=exp[i];
+        if(isalnum(ch)){
+            char temp[]={ch,'\0'};
+            strcpy(stack[++top],temp);
+        }
+        else if(ch=='+'||ch=='-'||ch=='*'||ch=='/'||ch=='^'){
+            char *s1 = stack[top--];
+            char *s2 = stack[top--];
+            char s3[100];
+            snprintf(s3,100,"(%s%c%s)",s2,ch,s1);
+            strcpy(stack[++top],s3);
+        }
+    }
+    char *s=(char*)malloc(strlen(stack[top])+1);
+    strcpy(s,stack[top]);
+    return s;
 }
+
+char* convertPrefixToInfix(char* exp){
+    int size=strlen(exp) , top=-1;
+    char stack[size][100];
+    for(int i=size-1;i>=0;i--){
+        char ch=exp[i];
+        if(isalnum(ch)){
+            char temp[]={ch,'\0'};
+            strcpy(stack[++top],temp);
+        }
+        else if(ch=='+'||ch=='-'||ch=='*'||ch=='/'||ch=='^'){
+            char *s1 = stack[top--];
+            char *s2 = stack[top--];
+            char s3[100];
+            snprintf(s3,100,"(%s%c%s)",s1,ch,s2);
+            strcpy(stack[++top],s3);
+        }
+    }
+    char *s=(char*)malloc(strlen(stack[top])+1);
+    strcpy(s,stack[top]);
+    return s;
+}
+
 int main(){
-    char str[100];
-    printf("Enter infix expression : ");
-    gets(str);
-    int result = evalInfixExpression(str);
-    printf("Result = %d\n", result);
-    printf("Enter postfix Expression :");
-    gets(str);
-     result = evalPostFixExpression(str);
-    printf("Result = %d\n",result);
-    printf("Enter prefix Expression :");
-    gets(str);
-    result = evalPreFixExpression(str);
-    printf("Result = %d\n",result);
-        return 0;
+    system("cls");
+    char exp[100];
+
+    printf("Enter Infix Expression: ");
+    gets(exp);
+    printf("Postfix form of Infix expression %s is %s \n",exp,convertInfixToPostfix(exp));
+
+    printf("Enter Infix Expression: ");  
+    gets(exp);
+    printf("Prefix form of Infix expression %s is %s \n",exp,convertInfixToPrefix(exp));
+
+    printf("Enter Postfix Expression : ");
+    gets(exp);
+    printf("Infix : %s\n",convertPostfixToInfix(exp));
+
+    printf("Enter Prefix Expression : ");
+    gets(exp);
+    printf("Infix : %s\n",convertPrefixToInfix(exp));
+
+    return 0;
 }
