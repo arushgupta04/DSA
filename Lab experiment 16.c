@@ -78,23 +78,23 @@ struct TreeNode *delete(struct TreeNode *root, int value)
     else
     {
         if (root->left == NULL && root->right == NULL)
-        { // Zero child - Leaf node
+        { 
             free(root);
             return NULL;
         }
         else if (root->right == NULL)
-        { // Left child
+        { 
             struct TreeNode *temp = temp->left;
             free(root);
             return temp;
         }
         else if (root->left == NULL)
-        { // Right child
+        { 
             struct TreeNode *temp = root->right;
             free(root);
             return temp;
         }
-        else // Two child
+        else 
         {
             struct TreeNode *temp = findMin(root->right);
             root->data = temp->data;
